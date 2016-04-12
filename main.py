@@ -10,7 +10,11 @@ Options:
     -u, --user <username>      Username
     -p, --password <password>  Password
 
-See 'main <command> --help' for more information on a specific command.
+Commands:
+    module1                    First plugin
+    module2                    Second plugin
+
+See 'main help <command>' for more information on a specific command.
 
 '''
 
@@ -38,7 +42,16 @@ if __name__ == '__main__':
     print 'Global arguments:'
     print args
 
+    show_help = False
     mod = args['<command>']
+    if mod == 'help':
+        show_help = True
+        mod = args['<args>'][0] if len(args['<args>']) > 0 else ''
+
+    if mod == '':
+        print __doc__
+        sys.exit(1)
+
     argv = [mod] + args['<args>']
     # argv = [mod] + sys.argv[1:]
     print argv
@@ -46,7 +59,11 @@ if __name__ == '__main__':
     if mod in get_plugin_list():
         pkg = imp.load_module(PLUGINS_DIR, *imp.find_module(PLUGINS_DIR))
         m = imp.load_module(PLUGINS_DIR + '.' + mod, *imp.find_module(mod, pkg.__path__))
-        # a = docopt(m.__doc__, argv=argv)
+        if show_help:
+            a = docopt(m.__doc__, argv=argv)
+            print m.__doc__
+            print str(a)
+            sys.exit(1)
         # print 'Command arguments:'
         # print a
         # print 'All arguments:'
